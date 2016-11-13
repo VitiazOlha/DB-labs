@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load filter %}
+<html>
+<head>
+
+    <script src="{% static "jquery-2.2.4.min.js" %}"></script>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/bootstrap-theme.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/core.css" %}" rel="stylesheet">
+
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <style>
+        .filter-col{
+            margin-right: 0;
+        }
+        .form-control{
+            width: 80%;
+        }
+        .inner {
+            display: inline-block;
+        }
+
+        .btn_l2margin {
+            margin-left: 22%;
+        }
+
+        .btn_lmargin {
+            margin-left: 2%;
+        }
+
+        .btn_bmargin {
+            margin-bottom: 3%;
+        }
+
+        .jumbotron {
+            text-align: center;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="jumbotron">
+    <h2>Taxi orders</h2>
+</div>
+{% if msgs %}
+    <div class="alert alert-success">
+        <strong>Searched( {{ total }} ):</strong><br>
+        {% for msg in msgs %}
+            {{ msg }} <br>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="container">
+    <div class="row">
+        <div id="filter-panel" class="collapse filter-panel">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <form action={{ request.get_full_path }}>{% csrf_token %}
+                            <div class="form-group inner">
+                                <div class="form-group">
+                                    <label class="filter-col" for="name">From length:</label>
+                                    <input type="text" class="form-control" name="fromLength" id="fromLength">
+                                    <label class="filter-col" for="name">To length:</label>
+                                    <input type="text" class="form-control" name="toLength" id="toLength">
+                                    <label class="filter-col" style="margin-right:0;" for="pref-perpage">Driver
+                                        name:</label>
+                                    <select id="pref-perpage" class="form-control" name="car_id">
+                                        <option selected="selected" value="0">All</option>
+                                        {% for driver in drivers %}
+                                            <option value="{{ driver|underscore:'_id' }}">{{ driver.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-default btn_l2margin">Find <span
+                                        class="glyphicon glyphicon-search"></span></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="inner btn_lmargin btn_bmargin">
+            <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#filter-panel">
+                <span class="glyphicon glyphicon-cog"></span> Search
+            </button>
+        </div>
+        {% if msgs %}
+            <div class="inner btn_lmargin btn_bmargin">
+                <a type="button" class="btn btn-primary" name="back_button"
+                   href="{% url 'main_page' %}">
+                    <span class="glyphicon glyphicon-record"></span> Show all
+                </a>
+            </div>
+        {% else %}
+            <div class="inner btn_lmargin btn_bmargin">
+                <a type="button" class="btn btn-primary" name="back_button"
+                   href="{% url 'add_page' %}">
+                    <span class="glyphicon glyphicon-record"></span> Add new
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Driver name</th>
+            <th>Driver phone</th>
+            <th>Client name</th>
+            <th>Client phone</th>
+            <th>Address from</th>
+            <th>Address to</th>
+            <th>Date</th>
+            <th>Total length</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            <tr class='clickable-row' data-href="{% url 'edit_page' order|underscore:'_id' %}">
+                <th>{{ order.driver.name }}</th>
+                <th>{{ order.driver.phone }}</th>
+                <th>{{ order.customer.name }}</th>
+                <th>{{ order.customer.phone }}</th>
+                <th>{{ order.address_from.name }}, {{ order.y_from }}</th>
+                <th>{{ order.address_to.name }}, {{ order.y_to }}</th>
+                <th>{{ order.data }}</th>
+                <th>{{ order.total }}</th>
+                <th><a href="/remove/{{ order|underscore:'_id' }}">
+                    <button class="ui red button">Delete</button>
+                </a></th>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    jQuery(document).ready(function ($) {
+        $(".clickable-row").click(function () {
+            window.document.location = $(this).data("href");
+        });
+    });
+</script>
+</body>
+
+</html>
